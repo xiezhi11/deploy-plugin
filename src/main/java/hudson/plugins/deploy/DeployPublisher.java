@@ -104,7 +104,8 @@ public class DeployPublisher extends Notifier implements SimpleBuildStep, Serial
 
             FilePath[] wars = workspace.list(warFiles);
             if (wars == null || wars.length == 0) {
-                throw new InterruptedException("[DeployPublisher][WARN] No wars found. Deploy aborted. %n");
+                listener.getLogger().println("[DeployPublisher][WARN] No wars found. Deploy aborted.");
+                throw new AbortException("No wars found. Deploy aborted.");
             }
             listener.getLogger().printf("[DeployPublisher][INFO] Attempting to deploy %d war file(s)%n", wars.length);
 
