@@ -49,6 +49,8 @@
         <revision>1.18</revision>
         <changelist>-SNAPSHOT</changelist>
         <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
+        <!-- Sets the MINIMUM supported Jenkins runtime: 2.479.x => Java 17 min, Java 21 supported.
+             The CI build/test JDKs are configured separately in the Jenkinsfile and may be newer. -->
         <jenkins.baseline>2.479</jenkins.baseline>
         <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
