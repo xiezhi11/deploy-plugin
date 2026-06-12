@@ -1,0 +1,21 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+    <f:entry title="${%Credentials}" field="credentialsId">
+        <c:select/>
+    </f:entry>
+    <f:invisibleEntry>
+      <f:textbox field="url"/>
+    </f:invisibleEntry>
+    <f:entry title="GlassFish home" field="home">
+        <f:textbox />
+    </f:entry>
+    <f:advanced>
+        <f:entry title="GlassFish admin port" field="adminPort">
+            <f:textbox />
+        </f:entry>
+        <f:entry title="GlassFish hostname" field="hostname">
+            <f:textbox />
+        </f:entry>
+    </f:advanced>
+</j:jelly>

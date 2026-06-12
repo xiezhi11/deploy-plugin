@@ -1,0 +1,30 @@
+package hudson.plugins.deploy.jboss;
+
+import hudson.Extension;
+import hudson.plugins.deploy.ContainerAdapterDescriptor;
+
+import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+public class JBoss6xAdapter extends JBossAdapter {
+    private static final long serialVersionUID = 7076342432395128986L;
+
+    @DataBoundConstructor
+    public JBoss6xAdapter(String url, String credentialsId) {
+        super(url, credentialsId);
+    }
+
+    @Override
+    public String getContainerId() {
+        return "jboss6x";
+    }
+
+    @Extension
+    @Symbol("jboss6")
+    public static final class DescriptorImpl extends ContainerAdapterDescriptor {
+        @Override
+        public String getDisplayName() {
+            return "JBoss AS 6.x";
+        }
+    }
+}
