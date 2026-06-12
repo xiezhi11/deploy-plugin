@@ -52,11 +52,62 @@
         <jenkins.baseline>2.479</jenkins.baseline>
         <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
-        <hpi.bundledArtifacts>admin-cli,admin-util,aopalliance-repackaged,asm-all,asm-repackaged,cargo-core-api-container,cargo-core-api-generic,cargo-core-api-module,cargo-core-api-util,cargo-core-container-glassfish,cargo-core-container-jboss,cargo-core-container-jetty,cargo-core-container-tomcat,cargo-core-container-weblogic,cargo-core-container-wildfly,cargo-licensed-dtds,class-model,classmate,common-util,commons-codec,commons-compress,commons-discovery,commons-io,config-api,config-types,deployment-client,deployment-common,geronimo-j2ee-deployment_1.1_spec,glassfish-api,gmbal,grizzly-config,grizzly-framework,grizzly-http,grizzly-http-server,grizzly-http2,grizzly-portunif,hibernate-validator,hk2,hk2-api,hk2-config,hk2-core,hk2-locator,hk2-runlevel,hk2-utils,internal-api,jackson-annotations,jackson-core,jackson-databind,jackson-module-jaxb-annotations,jakarta.enterprise.deploy-api,jakarta.inject,javassist,jaxen,jboss-logging,jdom2,jettison,jna,jna-platform,json-simple,launcher,ldapbp,logging,management-api,mimepull,nucleus-grizzly-all,pfl-asm,pfl-basic,pfl-basic-tools,pfl-dynamic,pfl-tf,pfl-tf-tools,scattered-archive-api,security,security-services,simple-glassfish-api,ssl-impl,stax-api,validation-api,xz</hpi.bundledArtifacts>
-        <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
         <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
+
+        <!-- ============================================================ -->
+        <!-- Deployment runtime dependency versions                       -->
+        <!-- ============================================================ -->
+        <!-- Cargo framework — adapters for Tomcat/JBoss/WildFly/Jetty/GlassFish/WebLogic -->
         <cargo.version>1.10.13</cargo.version>
+        <!-- GlassFish deployment-client — remote deployment to GlassFish 3.x/4.x/5.x -->
         <deployment-client.version>5.1.0</deployment-client.version>
+
+        <!-- ============================================================ -->
+        <!-- HPI bundled artifacts whitelist (79 artifacts)               -->
+        <!--                                                              -->
+        <!-- Split by provenance so reviewers can verify each group       -->
+        <!-- against the corresponding dependency declaration.            -->
+        <!--                                                              -->
+        <!-- strictBundledArtifacts=true makes the HPI plugin fail the    -->
+        <!-- build when a transitive dependency is NOT listed here.       -->
+        <!-- After adding or upgrading a dependency, update the matching  -->
+        <!-- group below; otherwise the build will fail at package phase. -->
+        <!-- ============================================================ -->
+        <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
+
+        <!-- Cargo (org.codehaus.cargo:*) — 11 artifacts -->
+        <bundledArtifacts.cargo>cargo-core-api-container,cargo-core-api-generic,cargo-core-api-module,cargo-core-api-util,cargo-core-container-glassfish,cargo-core-container-jboss,cargo-core-container-jetty,cargo-core-container-tomcat,cargo-core-container-weblogic,cargo-core-container-wildfly,cargo-licensed-dtds</bundledArtifacts.cargo>
+
+        <!-- GlassFish deployment-client and container runtime (org.glassfish.main.*) — 24 artifacts -->
+        <bundledArtifacts.glassfish-deploy>admin-cli,admin-util,class-model,classmate,common-util,config-api,config-types,deployment-client,deployment-common,geronimo-j2ee-deployment_1.1_spec,glassfish-api,gmbal,internal-api,jakarta.enterprise.deploy-api,launcher,ldapbp,logging,management-api,nucleus-grizzly-all,scattered-archive-api,security,security-services,simple-glassfish-api,ssl-impl</bundledArtifacts.glassfish-deploy>
+
+        <!-- HK2 DI framework — required by GlassFish at runtime — 7 artifacts -->
+        <bundledArtifacts.glassfish-hk2>hk2,hk2-api,hk2-config,hk2-core,hk2-locator,hk2-runlevel,hk2-utils</bundledArtifacts.glassfish-hk2>
+
+        <!-- Grizzly NIO framework — required by GlassFish at runtime — 6 artifacts -->
+        <bundledArtifacts.glassfish-grizzly>grizzly-config,grizzly-framework,grizzly-http,grizzly-http-server,grizzly-http2,grizzly-portunif</bundledArtifacts.glassfish-grizzly>
+
+        <!-- PFL (Portable Function Library) — required by GlassFish at runtime — 6 artifacts -->
+        <bundledArtifacts.glassfish-pfl>pfl-asm,pfl-basic,pfl-basic-tools,pfl-dynamic,pfl-tf,pfl-tf-tools</bundledArtifacts.glassfish-pfl>
+
+        <!-- Third-party transitive dependencies (Jackson, JNA, commons, etc.) — 25 artifacts -->
+        <bundledArtifacts.third-party>aopalliance-repackaged,asm-all,asm-repackaged,commons-codec,commons-compress,commons-discovery,commons-io,hibernate-validator,jackson-annotations,jackson-core,jackson-databind,jackson-module-jaxb-annotations,jakarta.inject,javassist,jaxen,jboss-logging,jdom2,jettison,jna,jna-platform,json-simple,mimepull,stax-api,validation-api,xz</bundledArtifacts.third-party>
+
+        <hpi.bundledArtifacts>${bundledArtifacts.cargo},${bundledArtifacts.glassfish-deploy},${bundledArtifacts.glassfish-hk2},${bundledArtifacts.glassfish-grizzly},${bundledArtifacts.glassfish-pfl},${bundledArtifacts.third-party}</hpi.bundledArtifacts>
+
+        <!--
+          === Validation commands ===
+          mvn validate                                  — POM structure check (offline if parent POM cached)
+          mvn dependency:tree -Dscope=runtime           — show runtime dependency tree (requires network)
+          mvn package -DskipTests                       — build HPI, triggers bundledArtifacts strict check (requires network)
+          mvn hpi:run                                   — run plugin in local Jenkins (requires network)
+          mvn dependency:list -DincludeScope=compile    — list compile-scope dependencies
+
+          Why some commands may not run fully offline:
+          - Parent POM (org.jenkins-ci.plugins:plugin:5.28) and BOM require repo.jenkins-ci.org
+          - Cargo and GlassFish deployment-client artifacts are not on Maven Central
+          - HPI packaging must resolve all transitive dependency JARs
+        -->
     </properties>
 
     <dependencyManagement>
