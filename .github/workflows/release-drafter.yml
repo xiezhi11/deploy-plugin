@@ -1,11 +1,11 @@
-# Note: additional setup is required, see https://github.com/jenkinsci/.github/blob/master/.github/release-drafter.adoc
+# Note: additional setup is required, see https://github.com/jenkinsci/.github/blob/main/.github/release-drafter.adoc
 
 name: Release Drafter
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   update_release_draft:
