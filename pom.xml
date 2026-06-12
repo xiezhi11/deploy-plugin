@@ -52,10 +52,45 @@
         <jenkins.baseline>2.479</jenkins.baseline>
         <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
+        <!--
+            ~~~ Bundled-artifacts allowlist (release-critical; treat as a lockfile) ~~~
+            maven-hpi-plugin packs exactly these artifacts into the .hpi. Because
+            hpi.strictBundledArtifacts=true (below), the build FAILS if this list does
+            not match the artifacts actually resolved for packaging. That is what stops
+            a runtime jar from being silently added to — or dropped from — the release.
+
+            Editing rules (enforced by the plugin's strict check):
+              * The value is parsed into a List and compared with List.equals against
+                the *sorted* actual set, so ORDER MATTERS: keep it alphabetically
+                sorted, comma-separated, and whitespace-free (no spaces / line breaks).
+              * Do NOT hand-remove entries to "tidy up" — a missing runtime artifact
+                only surfaces at deploy time, not at build time. If a diff changes this
+                list, it is because the dependency tree changed; verify that, don't fight it.
+              * To regenerate after an intentional dependency change: run the build
+                (see the Maven validation commands); on mismatch the plugin prints the
+                exact, correctly-sorted value to paste back here.
+
+            Origin: almost every entry is the transitive closure of the two pinned
+            deployment dependencies declared further below — org.codehaus.cargo:*
+            (cargo.version) and org.glassfish.main.deployment:deployment-client
+            (deployment-client.version). Use `mvn dependency:tree` to attribute any
+            single artifact before questioning it.
+        -->
         <hpi.bundledArtifacts>admin-cli,admin-util,aopalliance-repackaged,asm-all,asm-repackaged,cargo-core-api-container,cargo-core-api-generic,cargo-core-api-module,cargo-core-api-util,cargo-core-container-glassfish,cargo-core-container-jboss,cargo-core-container-jetty,cargo-core-container-tomcat,cargo-core-container-weblogic,cargo-core-container-wildfly,cargo-licensed-dtds,class-model,classmate,common-util,commons-codec,commons-compress,commons-discovery,commons-io,config-api,config-types,deployment-client,deployment-common,geronimo-j2ee-deployment_1.1_spec,glassfish-api,gmbal,grizzly-config,grizzly-framework,grizzly-http,grizzly-http-server,grizzly-http2,grizzly-portunif,hibernate-validator,hk2,hk2-api,hk2-config,hk2-core,hk2-locator,hk2-runlevel,hk2-utils,internal-api,jackson-annotations,jackson-core,jackson-databind,jackson-module-jaxb-annotations,jakarta.enterprise.deploy-api,jakarta.inject,javassist,jaxen,jboss-logging,jdom2,jettison,jna,jna-platform,json-simple,launcher,ldapbp,logging,management-api,mimepull,nucleus-grizzly-all,pfl-asm,pfl-basic,pfl-basic-tools,pfl-dynamic,pfl-tf,pfl-tf-tools,scattered-archive-api,security,security-services,simple-glassfish-api,ssl-impl,stax-api,validation-api,xz</hpi.bundledArtifacts>
+        <!-- Enforce the allowlist above: fail the build on any drift instead of warning. -->
         <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
+
         <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
+
+        <!--
+            ~~~ Deployment stack versions (intentionally pinned) ~~~
+            These drive the container/runtime libraries that get bundled, and thus the
+            allowlist above. They are pinned on purpose and are NOT upgraded by this
+            change. When you do bump one, regenerate hpi.bundledArtifacts via the build.
+        -->
+        <!-- org.codehaus.cargo:cargo-core-* containers (tomcat/jetty/jboss/wildfly/weblogic/glassfish) + generic API -->
         <cargo.version>1.10.13</cargo.version>
+        <!-- org.glassfish.main.deployment:deployment-client (pulls the HK2 / Grizzly / PFL / GMBAL closure) -->
         <deployment-client.version>5.1.0</deployment-client.version>
     </properties>
 
